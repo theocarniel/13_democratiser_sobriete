@@ -225,8 +225,8 @@ def main(query:str = "",
          maxwait:int = 60, 
          start_from_scratch:bool = False) -> None :
     
-    print(f"Downloading results to path : {output_dir}.
-          Make sure to give the full path (from root), otherwise automatic file renaming won't be functional.")
+    print(f"""Downloading results to path : {output_dir}.
+          Make sure to give the full path (from root), otherwise automatic file renaming won't be functional.""")
 
     driver = start_webdriver()
     scrape_all_urls(driver=driver,
