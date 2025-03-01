@@ -1,5 +1,3 @@
-import json
-import numpy as np
 import os
 import pandas as pd 
 import pickle as pkl 
@@ -17,7 +15,7 @@ output_dir = "/home/theo/D4G/13_democratiser_sobriete/scrapping/ingested_article
 dummy_dir = "/home/theo/D4G/13_democratiser_sobriete/scrapping/dummy_dir"
 
 # Request OpenAlex API
-def search_openalex(query: str, cursor="*", per_page:int = 50, from_doi:bool = False, dois: dict = []) -> dict:
+def search_openalex(query: str, cursor="*", per_page:int = 50, from_doi:bool = False, dois:list = []) -> dict:
     url = "https://api.openalex.org/works"
     if from_doi :
         pipe_separated_dois = "|".join(dois)
@@ -49,7 +47,7 @@ def get_urls_to_fetch(query_data: dict) :
         filenames.append(file_title.split('/')[-1])
         try : 
             urls_to_fetch.append(query_data["results"][i]["best_oa_location"]["pdf_url"])
-        except :
+        except TypeError :
             urls_to_fetch.append(query_data["results"][i]["open_access"]["oa_url"])
     return urls_to_fetch, filenames
 
@@ -102,7 +100,7 @@ def download_pdf(url: str, driver: webdriver.Chrome, filename: str, maxwait=30) 
                 return "Failed"
         os.rename(get_last_downloaded_file_path(dummy_dir), f"{os.path.join(output_dir, 'pdf_files', filename)}.pdf")
         return "Success"
-    except WebDriverException as e :
+    except WebDriverException :
         return "Failed"
 
 # Function that puts everything together to extract all pdf files and metadata from a single query
