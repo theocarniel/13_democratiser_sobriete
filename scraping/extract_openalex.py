@@ -27,7 +27,7 @@ def search_openalex(query: str, cursor="*", per_page:int = 50, from_doi:bool = F
     else :
         params = {
             "filter": "open_access.is_oa:true",
-            "search" : f'"{query}"',
+            "search" : f'{query}',
             "cursor" : cursor,
             "per-page": per_page,
             }
