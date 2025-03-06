@@ -11,12 +11,15 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 # Set directory where PDFs are saved
 # !!! SPECIFY DIRECTORY PATH FROM ROOT !!!
-output_dir = "/home/theo/D4G/13_democratiser_sobriete/scrapping/ingested_articles"
-dummy_dir = "/home/theo/D4G/13_democratiser_sobriete/scrapping/dummy_dir"
+output_dir = "/home/theo/D4G/13_democratiser_sobriete/scraping/ingested_articles"
+dummy_dir = "/home/theo/D4G/13_democratiser_sobriete/scraping/dummy_dir"
 
 # Request OpenAlex API
-def search_openalex(query: str, cursor="*", per_page:int = 50, from_doi:bool = False, dois:list = []) -> dict:
-    url = "https://api.openalex.org/works"
+def search_openalex(query: str, cursor="*", per_page:int = 50, from_doi:bool = False, dois:list = None) -> dict:
+    
+    if dois is None :
+        dois = []
+        
     if from_doi :
         pipe_separated_dois = "|".join(dois)
         params = {
@@ -31,8 +34,8 @@ def search_openalex(query: str, cursor="*", per_page:int = 50, from_doi:bool = F
             "cursor" : cursor,
             "per-page": per_page,
             }
-        
-    #url = f"""https://api.openalex.org/works?filter=is_oa:true&search="{query}"&cursor={cursor}&per-page={per_page}"""
+
+    url = "https://api.openalex.org/works"
     response = requests.get(url, params=params)
     response.raise_for_status()
     query_data = response.json()
@@ -52,7 +55,7 @@ def get_urls_to_fetch(query_data: dict) :
     return urls_to_fetch, filenames
 
 # Start Selenium webdriver for scraping
-def start_webdriver() -> webdriver.Chrome :
+def start_webdriver() -> webdriver.Chrome:
     chrome_options = webdriver.ChromeOptions()
     #chrome_options.add_argument("--headless=new")
     prefs = {
@@ -69,14 +72,14 @@ def start_webdriver() -> webdriver.Chrome :
     return driver
 
 # Function to empty a directory (mostly to make sure dummy_dir stays empty)
-def clear_directory(directory: str) -> None :
+def clear_directory(directory: str) -> None:
     files_in_dir = os.listdir(directory)
     for file in files_in_dir :
         os.remove(os.path.join(directory, file))
 
 # Tell driver to navigate to the given url, download the pdf and then rename the last downloaded file
-def download_pdf(url: str, driver: webdriver.Chrome, filename: str, maxwait=30) :
-    def get_last_downloaded_file_path(dummy_dir):
+def download_pdf(url: str, driver: webdriver.Chrome, filename: str, maxwait=30) -> str:
+    def get_last_downloaded_file_path(dummy_dir) -> str:
         """ Return the last modified -in this case last downloaded- file path.
             This function is going to loop as long as the directory is empty.
         """
@@ -110,7 +113,7 @@ def scrape_all_urls(driver: webdriver.Chrome,
                     start_from_scratch:bool = False, 
                     stop_criterion=None, 
                     maxwait:int = 60, 
-                    from_dois:bool = False) -> None :
+                    from_dois:bool = False) -> None:
     """
     - driver : chromedriver instance initialized from start_webdriver function
     - query : a query passed to the OpenAlex API if not downloading from a list of DOIs
@@ -221,7 +224,7 @@ def main(query:str = "",
          per_page:int = 100,
          stop_criterion = None, 
          maxwait:int = 60, 
-         start_from_scratch:bool = False) -> None :
+         start_from_scratch:bool = False) -> None:
     
     print(f"""Downloading results to path : {output_dir}.
           Make sure to give the full path (from root), otherwise automatic file renaming won't be functional.""")
